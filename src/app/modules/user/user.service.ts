@@ -1,30 +1,24 @@
-import { UserModel } from '../user.model';
-import { User } from './user.interface';
+import { User } from '../user.model';
+import { TUser } from './user.interface';
 
 //creating users that will save into database
-const createUserIntoDB = async (userData: User) => {
+const createUserIntoDB = async (userData: TUser) => {
   //const result = await UserModel.create(user);
-  const user = new UserModel(userData);
+  const user = new User(userData); // create an instance
+  if (await user.isUserExists(userData.userId)) {
+    throw new Error('User Already Exist');
+  }
   const result = await user.save();
   return result;
 };
 // get the users which is stored in database
 const getAllUsersFromDB = async () => {
-  const result = await UserModel.find(
-    {},
-    'username fullName age email address',
-  );
+  const result = await User.find({}, 'username fullName age email address');
   return result;
 };
 // get only singles users
-const getSingleUserFromDB = async (userId: number) => {
-  const result = await UserModel.findOne({ userId: userId });
-  //aggregation
-  // const result = await Student.aggregate([
-  //   {
-  //     $match: { id: id },
-  //   },
-  // ]);
+const getSingleUserFromDB = async (userId: string) => {
+  const result = await User.findOne({ userId: userId });
   return result;
 };
 

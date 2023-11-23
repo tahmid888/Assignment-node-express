@@ -1,7 +1,7 @@
 import { Schema, model } from 'mongoose';
-import { Address, User } from './user/user.interface';
-
-const addressSchema = new Schema<Address>({
+import { TAddress, TUser, UserMethods, UserModel } from './user/user.interface';
+import bcrypt from 'bcrypt';
+const addressSchema = new Schema<TAddress>({
   street: {
     type: String,
     trim: true,
@@ -23,7 +23,7 @@ const addressSchema = new Schema<Address>({
 //   price: { type: Number, required: true },
 //   quantity: { type: Number, required: true },
 // });
-const userSchema = new Schema<User>({
+const userSchema = new Schema<TUser, UserModel, UserMethods>({
   userId: {
     type: Number,
     required: [true, 'User Id is required'],
@@ -65,6 +65,9 @@ const userSchema = new Schema<User>({
   // },
   // ],
 });
-
+userSchema.methods.isUserExists = async function (userId: number) {
+  const existingUser = await User.findOne({ userId });
+  return existingUser;
+};
 // creating an user model
-export const UserModel = model<User>('User', userSchema);
+export const User = model<TUser, UserModel>('User', userSchema);
