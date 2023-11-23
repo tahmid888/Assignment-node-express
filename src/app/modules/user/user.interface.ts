@@ -7,12 +7,11 @@ export type TAddress = {
   city: string;
   country: string;
 };
-// export type Order = {
+// export type TOrder = {
 //   productName: string;
 //   price: number;
 //   quantity: number;
 // };
-
 export type TUser = {
   userId: number;
   username: string;
@@ -26,10 +25,18 @@ export type TUser = {
   isActive: boolean;
   hobbies: string[];
   address: TAddress;
-  //orders: Order[];
+  //orders?: TOrder[];
+  orders?:
+    | {
+        productName: string;
+        price: number;
+        quantity: number;
+      }[]
+    | undefined;
 };
 // for  customs instance
 export type UserMethods = {
+  // eslint-disable-next-line no-unused-vars
   isUserExists(userId: number): Promise<TUser | null>;
 };
 export type UserModel = Model<TUser, Record<string, never>, UserMethods>;

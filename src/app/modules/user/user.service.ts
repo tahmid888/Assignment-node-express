@@ -1,6 +1,6 @@
 import { User } from '../user.model';
 import { TUser } from './user.interface';
-
+//import { projection } from '../user.model';
 //creating users that will save into database
 const createUserIntoDB = async (userData: TUser) => {
   //const result = await UserModel.create(user);
@@ -18,8 +18,11 @@ const getAllUsersFromDB = async () => {
 };
 // get only singles users
 const getSingleUserFromDB = async (userId: string) => {
-  const result = await User.findOne({ userId: userId });
-  return result;
+  //const result = await User.findOne({ userId });
+  const userExists2 = await User.find({ userId, isActive: true }).select(
+    '-orders',
+  );
+  return userExists2;
 };
 
 export const userServices = {

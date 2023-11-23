@@ -1,5 +1,12 @@
 import { z } from 'zod';
-// define an zod schema for the user  address
+
+// define an zod schema for the user
+// const OrderValidationSchema = z.object({
+//   productName: z.string().optional(),
+//   price: z.number().optional(),
+//   quantity: z.number().optional(),
+// });
+
 const addressValidationSchema = z.object({
   street: z
     .string()
@@ -37,7 +44,17 @@ const userValidationSchema = z.object({
     message: 'email is required and can be maximum of 25 characters',
   }),
   isActive: z.boolean(),
-  hobbies: z.array(z.string().min(1).max(255)),
+  hobbies: z.array(z.string()),
   address: addressValidationSchema,
+  //orders: z.array(OrderValidationSchema).optional(),
+  orders: z
+    .array(
+      z.object({
+        productName: z.string(),
+        price: z.number(),
+        quantity: z.number(),
+      }),
+    )
+    .optional(),
 });
 export default userValidationSchema;
