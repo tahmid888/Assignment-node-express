@@ -1,6 +1,8 @@
 import { Request, Response } from 'express';
 import { userServices } from './user.service';
 import userValidationSchema from './user.validation';
+import { User } from '../user.model';
+
 //create users and show
 const createUser = async (req: Request, res: Response) => {
   try {
@@ -24,11 +26,14 @@ const createUser = async (req: Request, res: Response) => {
         address: userData.address,
       },
     });
-  } catch (err: any) {
+  } catch (error) {
     res.status(500).json({
       success: false,
-      message: err.message || 'Something went wrong,Checked carefully',
-      error: err,
+      message: 'User not created',
+      error: {
+        code: 500,
+        description: 'User not created!',
+      },
     });
   }
 };
@@ -48,8 +53,15 @@ const getAllUsers = async (req: Request, res: Response) => {
       message: 'Users fetched successfully!',
       data: includeUsers,
     });
-  } catch (err) {
-    console.log(err);
+  } catch (error) {
+    res.status(404).json({
+      success: false,
+      message: 'User not fetched',
+      error: {
+        code: 404,
+        description: 'User not fetched!',
+      },
+    });
   }
 };
 // get only a single users
@@ -74,17 +86,91 @@ const getSingleUser = async (req: Request, res: Response) => {
         },
       });
     }
-  } catch (err: any) {
+  } catch (error) {
     res.status(500).json({
       success: false,
-      message: 'Internal Server Error',
-      error: err.message,
+      message: 'Internal server error',
+      error: {
+        code: 500,
+        description: 'Internal server error',
+      },
     });
   }
 };
+//update the values of user
+const putUser = async (req: Request, res: Response) => {
+  const { userId } = req.params;
+  const updateData = req.body; // Assuming the request body contains the fields to be updated
+  const userToUpdate = await userServices.updateUserFromDB(userId);
+  try {
+    // Find the user by ID and update using updateOne
+    await User.updateOne({ _id: userToUpdate }, { $set: updateData });
 
+    if (updateData) {
+      return res.status(200).json({
+        success: true,
+        message: 'User updated successfully!',
+        data: updateData,
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Update failed!',
+      error: {
+        code: 500,
+        description: 'Update failed!',
+      },
+    });
+  }
+};
+// update the order property
+const putUserOrder = async (req: Request, res: Response) => {
+  const { userId } = req.params;
+  const updateData = req.body;
+  const orderToUpdate = await userServices.updateOrderFromDB(userId);
+
+  try {
+    const user = await User.findOne({ updateData });
+
+    if (!user) {
+      res.status(404).json({
+        success: false,
+        message: 'User not found!',
+        data: null,
+      });
+      return;
+    }
+
+    // Check if the user already has an 'orders' array
+    if (!user.orders) {
+      // If 'orders' array does not exist, create it and add the order data
+      user.orders = [];
+    }
+    user.orders.push(orderToUpdate);
+
+    // Save the updated user to the database
+    await user.save();
+    res.json({
+      success: true,
+      message: 'Order created successfully!',
+      data: updateData,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Update failed!',
+      error: {
+        code: 500,
+        description: 'Update failed!',
+      },
+    });
+  }
+};
 export const userControllers = {
   createUser,
   getAllUsers,
   getSingleUser,
+  putUser,
+  putUserOrder,
 };
