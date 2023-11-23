@@ -2,9 +2,10 @@ import { UserModel } from '../user.model';
 import { User } from './user.interface';
 
 //creating users that will save into database
-const createUserIntoDB = async (user: User) => {
-  const result = await UserModel.create(user);
-
+const createUserIntoDB = async (userData: User) => {
+  //const result = await UserModel.create(user);
+  const user = new UserModel(userData);
+  const result = await user.save();
   return result;
 };
 // get the users which is stored in database

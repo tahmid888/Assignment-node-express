@@ -4,14 +4,17 @@ import { Address, User } from './user/user.interface';
 const addressSchema = new Schema<Address>({
   street: {
     type: String,
+    trim: true,
     required: [true, 'street is required'],
   },
   city: {
     type: String,
+    trim: true,
     required: [true, 'city is required'],
   },
   country: {
     type: String,
+    trim: true,
     required: [true, 'country is required'],
   },
 });
@@ -31,27 +34,20 @@ const userSchema = new Schema<User>({
     unique: true,
     required: [true, ' Username is required'],
     trim: true,
-    maxlength: [20, 'User name can not be more than 20 character'],
-    validate: {
-      validator: function (value: string) {
-        const userNameStr = value.charAt(0).toUpperCase() + value.slice(1);
-        return userNameStr === value;
-      },
-      message: '{VALUE} is not capitalize format',
-    },
   },
   password: {
     type: String,
     required: [true, 'Password is required'],
-    maxlength: [20, 'Password can not be more than 20 characters'],
   },
   fullName: {
     firstName: {
       type: String,
+      trim: true,
       required: [true, 'first name is required'],
     },
     lastName: {
       type: String,
+      trim: true,
       required: [true, 'last name is required'],
     },
   },

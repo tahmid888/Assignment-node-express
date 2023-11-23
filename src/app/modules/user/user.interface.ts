@@ -26,3 +26,7 @@ export type User = {
   address: Address;
   //orders: Order[];
 };
+
+export type UserMethod = {
+  isUserExists(id: string): Promise<User>;
+};
