@@ -14,11 +14,7 @@ const addressSchema = new Schema<TAddress>({
   city: { type: String },
   country: { type: String },
 });
-// const OrderValidationSchema = new Schema<TOrder>({
-//   productName: { type: String },
-//   price: { type: Number },
-//   quantity: { type: Number },
-// });
+
 const userSchema = new Schema<TUser, UserModel, UserMethods, OrderMethods>(
   {
     userId: {
@@ -53,7 +49,7 @@ const userSchema = new Schema<TUser, UserModel, UserMethods, OrderMethods>(
     isActive: { type: Boolean, required: [true, 'active is required'] },
     hobbies: [{ type: String, required: [true, 'Hobbies are required'] }],
     address: { type: addressSchema, required: true, _id: false },
-    //orders: { type: [OrderValidationSchema] },
+
     orders: [
       {
         _id: false,

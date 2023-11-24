@@ -1,11 +1,6 @@
 import { z } from 'zod';
 
-// define an zod schema for the user
-// const OrderValidationSchema = z.object({
-//   productName: z.string().optional(),
-//   price: z.number().optional(),
-//   quantity: z.number().optional(),
-// });
+// define an zod schema for the users address
 
 const addressValidationSchema = z.object({
   street: z
@@ -25,9 +20,7 @@ const userValidationSchema = z.object({
     .string()
     .min(1)
     .max(20, { message: 'User name less 20 characters' }),
-  // .refine((value) => /^[A-Z]/.test(value), {
-  //   message: 'User name must start with a capital letter',
-  // }),
+
   password: z
     .string()
     .max(20, { message: 'password cannot exceed 20 characters' }),
@@ -46,7 +39,7 @@ const userValidationSchema = z.object({
   isActive: z.boolean(),
   hobbies: z.array(z.string()),
   address: addressValidationSchema,
-  //orders: z.array(OrderValidationSchema).optional(),
+
   orders: z
     .array(
       z.object({

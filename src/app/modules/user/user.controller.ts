@@ -265,6 +265,55 @@ const getOrder = async (req: Request, res: Response) => {
     });
   }
 };
+// calculate the total price of order
+const calculateOrder = async (req: Request, res: Response) => {
+  const { userId } = req.params;
+  try {
+    const user = await userServices.calculateOrderFromDB(userId);
+
+    if (!user) {
+      res.status(404).json({
+        success: false,
+        message: 'User not found',
+        error: {
+          code: 404,
+          description: 'User not found!',
+        },
+      });
+      return;
+    }
+
+    // If the user has no orders then  return total price
+    if (!user.orders || user.orders.length === 0) {
+      return res.json({
+        success: true,
+        message: 'No orders found for the user',
+        data: { totalPrice: 0 },
+      });
+    }
+
+    // Calculate the total price of all orders in the list
+    const totalPrice = user.orders.reduce(
+      (sum, order) => sum + order.price * order.quantity,
+      0,
+    );
+
+    res.json({
+      success: true,
+      message: 'Total price calculated successfully!',
+      data: { totalPrice },
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Filed to calculate total price',
+      error: {
+        code: 500,
+        description: 'Filed to calculate total price',
+      },
+    });
+  }
+};
 export const userControllers = {
   createUser,
   getAllUsers,
@@ -273,4 +322,5 @@ export const userControllers = {
   deleteUser,
   putUserOrder,
   getOrder,
+  calculateOrder,
 };
