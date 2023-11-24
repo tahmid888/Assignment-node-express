@@ -100,7 +100,7 @@ const getSingleUser = async (req: Request, res: Response) => {
 //update the values of user
 const putUser = async (req: Request, res: Response) => {
   const { userId } = req.params;
-  const updateData = req.body; // Assuming the request body contains the fields to be updated
+  const updateData = req.body;
   const userToUpdate = await userServices.updateUserFromDB(userId);
 
   try {
@@ -108,7 +108,7 @@ const putUser = async (req: Request, res: Response) => {
     await User.updateOne(
       { _Id: userToUpdate },
       { $set: updateData },
-      { new: true, select: '-password', projection: { password: 0 } },
+      { new: true, projection: { password: 0 } },
     );
 
     if (updateData) {
@@ -130,31 +130,30 @@ const putUser = async (req: Request, res: Response) => {
   }
 };
 
-// delete the users
+// delete the users by their id
 
 const deleteUser = async (req: Request, res: Response) => {
   const userId = req.params.userId;
 
-  //const updateData = req.body;
-  //  const deleteUser = await userServices.deleteUserFromDB(userId);
-
   try {
-    //const deleteUser = await userServices.deleteUserFromDB(userId);
-    const result = await User.deleteOne({ _id: userId });
+    const result = await User.deleteOne({ userId: userId });
+    // If deletedCount is 0, it means the user was not found
     if (result.deletedCount === 0) {
-      // If deletedCount is 0, it means the user was not found
-      return res
-        .status(404)
-        .json({ success: false, message: 'User not found', data: null });
+      return res.status(404).json({
+        success: false,
+        message: 'User not found',
+        error: {
+          code: 404,
+          description: 'User not found!',
+        },
+      });
     }
-    // Send a success response
     res.json({
       success: true,
       message: 'User deleted successfully!',
       data: null,
     });
   } catch (error) {
-    console.log(error);
     res.status(500).json({
       success: false,
       message: 'delete failed!',
@@ -173,14 +172,7 @@ const putUserOrder = async (req: Request, res: Response) => {
 
   try {
     const user = await userServices.updateOrderFromDB(userId);
-    // if (!user) {
-    //   res.status(200).json({
-    //     success: false,
-    //     message: 'User not exist!',
-    //     data: user,
-    //   });
-    //   return;
-    // }
+
     if (!user) {
       res.status(404).json({
         success: false,
@@ -199,7 +191,6 @@ const putUserOrder = async (req: Request, res: Response) => {
     }
     user.orders.push(updateData);
 
-    // Save the updated user to the database
     await user.save();
     res.json({
       success: true,
@@ -306,10 +297,10 @@ const calculateOrder = async (req: Request, res: Response) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: 'Filed to calculate total price',
+      message: 'Failed to calculate total price',
       error: {
         code: 500,
-        description: 'Filed to calculate total price',
+        description: 'Failed to calculate total price',
       },
     });
   }

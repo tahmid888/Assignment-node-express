@@ -5,7 +5,6 @@ import {
   TUser,
   UserMethods,
   UserModel,
-  //TOrder,
 } from './user/user.interface';
 import bcrypt from 'bcrypt';
 import config from '../config';
@@ -91,6 +90,9 @@ userSchema.methods.isUserExists = async function (userId: number) {
 userSchema.methods.isOrderExists = async function (orders: string | number) {
   const orderExistUser = await User.find({ orders });
   return orderExistUser;
+};
+export const projection = {
+  password: 0,
 };
 
 // creating an user model
