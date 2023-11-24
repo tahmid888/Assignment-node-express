@@ -17,25 +17,31 @@ const getAllUsersFromDB = async () => {
   return result;
 };
 // get only singles users
-const getSingleUserFromDB = async (userId: string) => {
+const getSingleUserFromDB = async (userId: number) => {
   const userExists2 = await User.find({ userId, isActive: true }).select(
     '-orders',
   );
   return userExists2;
 };
 // update the user
-const updateUserFromDB = async (userId: string) => {
-  const userUpdate = await User.findOne({ userId });
+const updateUserFromDB = async (userId: number | string) => {
+  const userUpdate = await User.findOne({ userId, isActive: true });
 
   return userUpdate;
+};
+// delete user by id
+const deleteUserFromDB = async (userId: string) => {
+  //const userDelete = await User.findByIdAndUpdate(userId);
+  const deletedUser = await User.findOneAndDelete(userId);
+  return deletedUser;
 };
 
 // put a order
 
-const updateOrderFromDB = async (userId: string) => {
-  const userUpdate = await User.findOne({ userId });
+const updateOrderFromDB = async (userId: string | number) => {
+  const orderUpdate = await User.findOne({ userId });
 
-  return userUpdate;
+  return orderUpdate;
 };
 
 export const userServices = {
@@ -43,5 +49,6 @@ export const userServices = {
   getAllUsersFromDB,
   getSingleUserFromDB,
   updateUserFromDB,
+  deleteUserFromDB,
   updateOrderFromDB,
 };

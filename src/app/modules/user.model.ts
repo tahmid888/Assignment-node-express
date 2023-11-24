@@ -1,5 +1,6 @@
 import { Schema, model } from 'mongoose';
 import {
+  OrderMethods,
   TAddress,
   TUser,
   UserMethods,
@@ -18,7 +19,7 @@ const addressSchema = new Schema<TAddress>({
 //   price: { type: Number },
 //   quantity: { type: Number },
 // });
-const userSchema = new Schema<TUser, UserModel, UserMethods>(
+const userSchema = new Schema<TUser, UserModel, UserMethods, OrderMethods>(
   {
     userId: {
       type: Number,
@@ -51,7 +52,7 @@ const userSchema = new Schema<TUser, UserModel, UserMethods>(
     email: { type: String, required: [true, 'email is required'] },
     isActive: { type: Boolean, required: [true, 'active is required'] },
     hobbies: [{ type: String, required: [true, 'Hobbies are required'] }],
-    address: { type: addressSchema, required: false },
+    address: { type: addressSchema, required: true, _id: false },
     //orders: { type: [OrderValidationSchema] },
     orders: [
       {
@@ -89,5 +90,11 @@ userSchema.methods.isUserExists = async function (userId: number) {
   const existingUser = await User.findOne({ userId });
   return existingUser;
 };
+//order exist
+userSchema.methods.isOrderExists = async function (orders: string | number) {
+  const orderExistUser = await User.find({ orders });
+  return orderExistUser;
+};
+
 // creating an user model
 export const User = model<TUser, UserModel>('User', userSchema);

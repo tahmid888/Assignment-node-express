@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { userServices } from './user.service';
 import userValidationSchema from './user.validation';
 import { User } from '../user.model';
+import mongoose from 'mongoose';
 
 //create users and show
 const createUser = async (req: Request, res: Response) => {
@@ -67,7 +68,7 @@ const getAllUsers = async (req: Request, res: Response) => {
 // get only a single users
 const getSingleUser = async (req: Request, res: Response) => {
   try {
-    const { userId } = req.params;
+    const userId = req.params.userId;
     const userExists = await userServices.getSingleUserFromDB(userId);
 
     if (userExists) {
@@ -102,9 +103,14 @@ const putUser = async (req: Request, res: Response) => {
   const { userId } = req.params;
   const updateData = req.body; // Assuming the request body contains the fields to be updated
   const userToUpdate = await userServices.updateUserFromDB(userId);
+
   try {
     // Find the user by ID and update using updateOne
-    await User.updateOne({ _id: userToUpdate }, { $set: updateData });
+    await User.updateOne(
+      { _Id: userToUpdate },
+      { $set: updateData },
+      { new: true, select: '-password', projection: { password: 0 } },
+    );
 
     if (updateData) {
       return res.status(200).json({
@@ -124,53 +130,89 @@ const putUser = async (req: Request, res: Response) => {
     });
   }
 };
+
+// delete the users
+
+const deleteUser = async (req: Request, res: Response) => {
+  const userId = req.params.userId;
+
+  //const updateData = req.body;
+  //  const deleteUser = await userServices.deleteUserFromDB(userId);
+
+  try {
+    //const deleteUser = await userServices.deleteUserFromDB(userId);
+    const result = await User.deleteOne({ _id: userId });
+    if (result.deletedCount === 0) {
+      // If deletedCount is 0, it means the user was not found
+      return res
+        .status(404)
+        .json({ success: false, message: 'User not found', data: null });
+    }
+    // Send a success response
+    res.json({
+      success: true,
+      message: 'User deleted successfully!',
+      data: null,
+    });
+  } catch (error) {
+    console.log(error);
+    // res.status(500).json({
+    //   success: false,
+    //   message: error.details || 'delete failed!',
+    //   error: {
+    //     code: 500,
+    //     description: 'delete failed!',
+    //   },
+    // });
+  }
+};
+
 // update the order property
 const putUserOrder = async (req: Request, res: Response) => {
   const { userId } = req.params;
   const updateData = req.body;
-  const orderToUpdate = await userServices.updateOrderFromDB(userId);
 
   try {
-    const user = await User.findOne({ updateData });
-
+    const user = await userServices.updateOrderFromDB(userId);
     if (!user) {
-      res.status(404).json({
+      res.status(200).json({
         success: false,
-        message: 'User not found!',
-        data: null,
+        message: 'User not exist!',
+        data: user,
       });
       return;
     }
-
     // Check if the user already has an 'orders' array
     if (!user.orders) {
       // If 'orders' array does not exist, create it and add the order data
       user.orders = [];
     }
-    user.orders.push(orderToUpdate);
+    user.orders.push(updateData);
 
     // Save the updated user to the database
     await user.save();
     res.json({
       success: true,
       message: 'Order created successfully!',
-      data: updateData,
+      data: null,
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: 'Update failed!',
+      message: 'Update failed to order!',
       error: {
         code: 500,
-        description: 'Update failed!',
+        description: 'Update failed to order!',
       },
     });
   }
 };
+// get  the order property
 export const userControllers = {
   createUser,
   getAllUsers,
   getSingleUser,
   putUser,
+  deleteUser,
   putUserOrder,
 };
