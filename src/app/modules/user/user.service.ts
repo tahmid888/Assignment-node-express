@@ -43,6 +43,12 @@ const updateOrderFromDB = async (userId: string | number) => {
 
   return orderUpdate;
 };
+// get the orders
+const getOrderFromDB = async (userId: string | number) => {
+  const orderUpdate = await User.findOne({ userId });
+
+  return orderUpdate;
+};
 
 export const userServices = {
   createUserIntoDB,
@@ -51,4 +57,5 @@ export const userServices = {
   updateUserFromDB,
   deleteUserFromDB,
   updateOrderFromDB,
+  getOrderFromDB,
 };

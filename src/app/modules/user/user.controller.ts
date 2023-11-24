@@ -2,7 +2,6 @@ import { Request, Response } from 'express';
 import { userServices } from './user.service';
 import userValidationSchema from './user.validation';
 import { User } from '../user.model';
-import mongoose from 'mongoose';
 
 //create users and show
 const createUser = async (req: Request, res: Response) => {
@@ -156,14 +155,14 @@ const deleteUser = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.log(error);
-    // res.status(500).json({
-    //   success: false,
-    //   message: error.details || 'delete failed!',
-    //   error: {
-    //     code: 500,
-    //     description: 'delete failed!',
-    //   },
-    // });
+    res.status(500).json({
+      success: false,
+      message: 'delete failed!',
+      error: {
+        code: 500,
+        description: 'delete failed!',
+      },
+    });
   }
 };
 
@@ -174,17 +173,28 @@ const putUserOrder = async (req: Request, res: Response) => {
 
   try {
     const user = await userServices.updateOrderFromDB(userId);
+    // if (!user) {
+    //   res.status(200).json({
+    //     success: false,
+    //     message: 'User not exist!',
+    //     data: user,
+    //   });
+    //   return;
+    // }
     if (!user) {
-      res.status(200).json({
+      res.status(404).json({
         success: false,
-        message: 'User not exist!',
-        data: user,
+        message: 'User not found',
+        error: {
+          code: 404,
+          description: 'User not found!',
+        },
       });
       return;
     }
-    // Check if the user already has an 'orders' array
+    // Checking if the user  has an orders
     if (!user.orders) {
-      // If 'orders' array does not exist, create it and add the order data
+      // If orders array does not exist create order and add the order data
       user.orders = [];
     }
     user.orders.push(updateData);
@@ -208,6 +218,53 @@ const putUserOrder = async (req: Request, res: Response) => {
   }
 };
 // get  the order property
+const getOrder = async (req: Request, res: Response) => {
+  const { userId } = req.params;
+  try {
+    const user = await userServices.getOrderFromDB(userId);
+
+    if (!user) {
+      res.status(404).json({
+        success: false,
+        message: 'User not found',
+        error: {
+          code: 404,
+          description: 'User not found!',
+        },
+      });
+      return;
+    }
+
+    // If the user has no orders it will an return  empty array
+    if (!user.orders || user.orders.length === 0) {
+      return res.json({
+        success: true,
+        message: 'No orders found for the user',
+        data: { orders: [] },
+      });
+    }
+    const ordersPlaced = user.orders.map((order) => ({
+      productName: order.productName,
+      price: order.price,
+      quantity: order.quantity,
+    }));
+
+    res.json({
+      success: true,
+      message: 'Order fetched successfully!',
+      data: { orders: ordersPlaced },
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Filed to find order',
+      error: {
+        code: 500,
+        description: 'Filed to find order',
+      },
+    });
+  }
+};
 export const userControllers = {
   createUser,
   getAllUsers,
@@ -215,4 +272,5 @@ export const userControllers = {
   putUser,
   deleteUser,
   putUserOrder,
+  getOrder,
 };

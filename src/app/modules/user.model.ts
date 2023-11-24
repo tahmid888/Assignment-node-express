@@ -56,6 +56,7 @@ const userSchema = new Schema<TUser, UserModel, UserMethods, OrderMethods>(
     //orders: { type: [OrderValidationSchema] },
     orders: [
       {
+        _id: false,
         productName: { type: String },
         price: { type: Number },
         quantity: { type: Number },
